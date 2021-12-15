@@ -45,9 +45,23 @@
 </table>
 ```
 
-2.  引入jQuery.js、laydate.js
-3.  引入etable.js
-4.  初始化上述table，使之编程可编辑的表格
+2.  引入jQuery.js、laydate.js、etable.js
+
+
+```shell
+# git clone https://gitee.com/funsent/etable.git
+```
+
+```javascript
+<script src="jQuery.js"></script>
+<script src="laydate.js"></script>
+<script src="etable.js"></script>
+```
+
+> jQuery 、laydate 请自行到相关网站下载
+
+
+3.  初始化上述table，使之编程可编辑的表格
 
 ```javascript
 let values = {0:'禁用', 1:'启用'}; // select下拉框的可选数据来源
@@ -70,7 +84,9 @@ funsent.etable.init({
 ```
 > 以上即完成了etable插件的页面载入和使用
 
-5.  如果需要提交表单数据到后台，可用如下方法
+4.  数据收集
+
+> 如果需要提交表单数据到后台，可用如下方法
 
 ```javascript
 funsent.etable.serializeArray()
