@@ -2,19 +2,30 @@
 /**
  * 一款基于jQuery的轻量级可编辑表格插件，适用于快速录单等应用场景，支持键盘操作
  * 
+ * @package  funsent
+ * @link     http://www.funsent.com
+ * @license  https://opensource.org/licenses/MIT/
  * @author   yanggf <2018708@qq.com>
- * @version  $Id: etable.js 223 2021-12-14 11:25:50Z yanggf $
+ * @version  0.0.1
  */
 
 ; (function ($, global) {
     let defaults = {
-        table_target: null, //表格
-        row_number: 0, // 空表格时为可编辑行数，非空表格时为多出的可编辑行数
-        column_number: 0, // 空表格时为可编辑列数
-        enable_keyboard: false, // 启用键盘操作，适用快速录单等场景
-        enable_tab_insert: false, // 焦点在最后一个元素上时按TAB键插入新行，enable_keyboard为true时有效
-        enable_button: false, // 启用操作按钮
-        no_edit_rows: [], // 不启用编辑的行索引, 如果为数字，表示前几行都不启用编辑
+        // 表格元素
+        table_target: null,
+        // 空表格时为可编辑行数，非空表格时为多出的可编辑行数
+        row_number: 0,
+        // 空表格时为可编辑列数
+        column_number: 0,
+        // 启用键盘操作，适用快速录单等场景
+        enable_keyboard: false,
+        // 焦点在最后一个元素上时按TAB键插入新行，enable_keyboard为true时有效
+        enable_tab_insert: false,
+        // 启用操作按钮
+        enable_button: false,
+        // 不启用编辑的行索引, 如果为数字，表示前几行都不启用编辑
+        no_edit_rows: [],
+        // 自定义列数组
         columns: [
             // 复选框类型，此时width、height、align等字段无效，且永远水平居中    
             // {type:'checkbox', name:'', value:'', width:'100%', height:'100%', align:'', readonly:false},
@@ -31,10 +42,14 @@
         ],
     };
 
+    // 配置参数
     let configs = {};
-    let oldDataRows = []; // 已存在的行
-    let editableRows = []; // 可编辑的所有行
+    // 已存在的行
+    let oldDataRows = [];
+    // 可编辑的所有行
+    let editableRows = [];
 
+    // 插件主体
     let etable = {
         // 参数配置
         config: function (opts) {
