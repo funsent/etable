@@ -89,8 +89,10 @@ funsent.etable.init({
 > 如果需要提交表单数据到后台，可用如下方法
 
 ```javascript
-funsent.etable.serializeArray()
+let arr = funsent.etable.serializeArray()
 ```
+
+>  返回的是json对象数组，如果提交到服务器后，则请自行处理
 
 #### 插件已实现列类型
 
