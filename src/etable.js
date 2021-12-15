@@ -7,7 +7,7 @@
  * @link     http://www.funsent.com
  * @license  https://opensource.org/licenses/MIT/
  * @author   yanggf <2018708@qq.com>
- * @version  0.0.2
+ * @version  0.0.3
  */
 
  ; (function ($, global) {
@@ -16,6 +16,8 @@
         table_target: null,
         // 空表格时为可编辑行数，非空表格时为多出的可编辑行数
         row_number: 0,
+        // 可编辑行数的上限
+        editable_row_max: 10,
         // 空表格时为可编辑列数
         column_number: 0,
         // 启用键盘操作，适用快速录单等场景
@@ -105,6 +107,13 @@
         insertEditableRow: function (index, direct) {
             let $row = editableRows[index];
             if ($row) {
+
+                let rowMax = this.config('editable_row_max');
+                if (editableRows.length >= rowMax) {
+                    layer.msg('无法新增行，最多编辑行数：' + rowMax);
+                    return false;
+                }
+
                 let $target = $(this.config('table_target')),
                     $tbody = $target.find('tbody');
                 let i = editableRows.length + 1;
@@ -123,14 +132,18 @@
                     $tbody.find('tr:eq(' + index + ')').before($tr);
                     editableRows.splice(index, 0, $tr);
                 }
+                return true;
             }
+            return false;
         },
         removeEditableRow: function (index) {
             let $row = editableRows[index];
             if ($row) {
                 $row.remove();
                 editableRows.splice(index, 1);
+                return true;
             }
+            return false;
         },
 
         // 渲染表格单元格为编辑器
@@ -273,10 +286,11 @@
                         // 焦点在最后一个元素上时按TAB键插入新行，enable_keyboard为true时有效
                         if (k == 9 && that.config('enable_tab_insert') && index == inputCnt - 1) {
                             let rowIndex = rowCnt - 1;
-                            that.insertEditableRow(rowIndex, 'after');
-                            that.setToolBtns();
-                            that.resetOrder();
-                            that.setKeyboard();
+                            if (that.insertEditableRow(rowIndex, 'after')) {
+                                that.setToolBtns();
+                                that.resetOrder();
+                                that.setKeyboard();
+                            }
                             return;
                         }
                         // TAB键、右方向键和回车键
@@ -359,17 +373,19 @@
 
                 // 上方插入新行
                 $btn1.bind('click', function () {
-                    that.insertEditableRow(i, 'before');
-                    that.setToolBtns();
-                    that.resetOrder();
-                    that.setKeyboard();
+                    if (that.insertEditableRow(i, 'before')) {
+                        that.setToolBtns();
+                        that.resetOrder();
+                        that.setKeyboard();
+                    }
                 });
                 // 下方插入新行
                 $btn2.bind('click', function () {
-                    that.insertEditableRow(i, 'after');
-                    that.setToolBtns();
-                    that.resetOrder();
-                    that.setKeyboard();
+                    if (that.insertEditableRow(i, 'after')) {
+                        that.setToolBtns();
+                        that.resetOrder();
+                        that.setKeyboard();
+                    }
                 });
                 // 删除当前行
                 $btn3.bind('click', function () {
@@ -377,11 +393,12 @@
                         layer.msg('不能删除唯一行');
                         return;
                     }
-                    $group.remove();
-                    that.removeEditableRow(i);
-                    that.setToolBtns();
-                    that.resetOrder();
-                    that.setKeyboard();
+                    if (that.removeEditableRow(i)) {
+                        $group.remove();
+                        that.setToolBtns();
+                        that.resetOrder();
+                        that.setKeyboard();
+                    }
                 });
 
                 if (!$('style[rel="funsent-etable-btn-style"]').length) {
