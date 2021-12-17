@@ -136,22 +136,22 @@ funsent.etable.init('#etable2', {
 
 ```javascript
 // 获取方法一：参数以字符串样式给出
-let arr = funsent.etable.data('#etable1'); // 以上HTML结构中，获取的是etable1中的数据
-let arr = funsent.etable.data('#etable2'); // 以上HTML结构中，获取的是etable2中的数据
+let arr = funsent.etable.data('#etable1'); // 获取etable1数据
+let arr = funsent.etable.data('#etable2'); // 获取etable2数据
 
 // 获取方法二: 参数以dom对象或jQuery对象形式给出
-let arr = funsent.etable.data(document.querySelector('#etable1')); // 以上HTML结构中，获取的是etable1中的数据
-let arr = funsent.etable.data(document.querySelector('#etable2')); // 以上HTML结构中，获取的是etable2中的数据
-let arr = funsent.etable.data($('#etable1')); // 以上HTML结构中，获取的是etable1中的数据
-let arr = funsent.etable.data($('#etable2')); // 以上HTML结构中，获取的是etable2中的数据
+let arr = funsent.etable.data(document.querySelector('#etable1')); // 获取etable1数据
+let arr = funsent.etable.data(document.querySelector('#etable2')); // 获取etable2数据
+let arr = funsent.etable.data($('#etable1')); // 获取etable1数据
+let arr = funsent.etable.data($('#etable2')); // 获取etable2数据
 
 // 获取方法三：参数以实例化顺序索引给出
-let arr = funsent.etable.data(0); // 以上HTML结构中，获取的是etable1中的数据
-let arr = funsent.etable.data(1); // 以上HTML结构中，获取的是etable2中的数据
+let arr = funsent.etable.data(0); // 获取etable1数据
+let arr = funsent.etable.data(1); // 获取etable2数据
 
 // 获取方法思：参数以自定义标签给出
-let arr = funsent.etable.data({tag:'etable1_tag'}); // 以上HTML结构中，获取的是etable1中的数据
-let arr = funsent.etable.data({tag:'etable2_tag'}); // 以上HTML结构中，获取的是etable2中的数据
+let arr = funsent.etable.data({tag:'etable1_tag'}); // 获取etable1数据
+let arr = funsent.etable.data({tag:'etable2_tag'}); // 获取etable2数据
 ```
 
 >  返回的是json对象数组，如果提交到服务器后，则请自行处理
