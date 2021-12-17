@@ -89,7 +89,7 @@
 > jQuery 、laydate 请自行到相关网站下载
 
 
-3.  初始化上述table，使之编程可编辑的表格
+3.  初始化，两个table转成可编辑的表格
 
 ```javascript
 let values = {0:'禁用', 1:'启用'}; // select下拉框的可选数据来源
