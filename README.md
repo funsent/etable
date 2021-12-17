@@ -12,37 +12,64 @@
 
 #### 插件演示
 
-![插件演示](tests/imagesetable%E6%BC%94%E7%A4%BA.gif)
+![单实例动画演示](tests/instance.gif)
 
+![多实例演示](tests/instances.png)
 
-#### 插件安装使用
+#### 插件使用
 
 1.  严格按照如下方式建立页面结构
 
 ```html
-<table class="etable">
-    <thead>
-        <tr>
-            <th style="40px;"></th>
-            <th style="100px;">证书名称</th>
-            <th style="100px;">证书编号</th>
-            <th style="100px;">颁发日期</th>
-            <th style="100px;">颁发机构</th>
-            <th style="100px;">备注</th>
-        </tr>
-    </thead>
+<div> <!-- 这层结构是必须的 -->
+    <table id="etable1">
+        <thead> <!-- thead是必须的 -->
+            <tr>
+                <th style="40px;"></th> <!-- 注意是th不是td -->
+                <th style="100px;">证书名称</th>
+                <th style="100px;">证书编号</th>
+                <th style="100px;">颁发日期</th>
+                <th style="100px;">颁发机构</th>
+                <th style="100px;">备注</th>
+            </tr>
+        </thead>
 
-    <tbody>
-        <tr>
-            <td></td>
-            <td></td>
-            <td></td>
-            <td></td>
-            <td></td>
-            <td></td>
-        </tr>
-    </tbody>
-</table>
+        <tbody> <!-- tbody是必须的 -->
+            <tr>
+                <td></td> <!-- 这里才是td -->
+                <td></td>
+                <td></td>
+                <td></td>
+                <td></td>
+                <td></td>
+            </tr>
+        </tbody>
+    </table>
+
+    <table id="etable2">
+        <thead> <!-- thead是必须的 -->
+            <tr>
+                <th style="40px;"></th> <!-- 注意是th不是td -->
+                <th style="100px;">证书名称</th>
+                <th style="100px;">证书编号</th>
+                <th style="100px;">颁发日期</th>
+                <th style="100px;">颁发机构</th>
+                <th style="100px;">备注</th>
+            </tr>
+        </thead>
+
+        <tbody> <!-- tbody是必须的 -->
+            <tr>
+                <td></td> <!-- 这里才是td -->
+                <td></td>
+                <td></td>
+                <td></td>
+                <td></td>
+                <td></td>
+            </tr>
+        </tbody>
+    </table>
+</div>
 ```
 
 2.  引入jQuery.js、laydate.js、etable.js
@@ -54,6 +81,7 @@
 
 ```javascript
 <script src="jQuery.js"></script>
+<script src="layer.js"></script>
 <script src="laydate.js"></script>
 <script src="etable.js"></script>
 ```
@@ -66,9 +94,27 @@
 ```javascript
 let values = {0:'禁用', 1:'启用'}; // select下拉框的可选数据来源
 
-funsent.etable.init({
-    table_target: '.etable',
+funsent.etable.init('#etable1', {
+    tag: 'etable1_tag'
     row_number: 3,
+    editable_row_max: 10, // 新增参数，限制可编辑行数上限
+    enable_keyboard: true,
+    enable_tab_insert: true,
+    enable_button: true,
+    columns: [
+        {type:'checkbox', name:'id', value:'', readonly:false},
+        {type:'text', name:'name', value:'', align:'left', readonly:false},
+        {type:'text', name:'certno', value:'', align:'left', readonly:false},
+        {type:'date', name:'issue_time', value:'', align:'center', readonly:true},
+        {type:'text', name:'issue_body', value:'', align:'left', readonly:false},
+        {type:'select', name:'remark', value:'1', align:'left', readonly:false, values:values, style:{padding:'4px 4px 5px'}},
+    ]
+});
+
+funsent.etable.init('#etable2', {
+    tag: 'etable2_tag'
+    row_number: 3,
+    editable_row_max: 10, // 新增参数，限制可编辑行数上限
     enable_keyboard: true,
     enable_tab_insert: true,
     enable_button: true,
@@ -89,10 +135,33 @@ funsent.etable.init({
 > 如果需要提交表单数据到后台，可用如下方法
 
 ```javascript
-let arr = funsent.etable.serializeArray()
+// 获取方法一：参数以字符串样式给出
+let arr = funsent.etable.data('#etable1'); // 以上HTML结构中，获取的是etable1中的数据
+let arr = funsent.etable.data('#etable2'); // 以上HTML结构中，获取的是etable2中的数据
+
+// 获取方法二: 参数以dom对象或jQuery对象形式给出
+let arr = funsent.etable.data(document.querySelector('#etable1')); // 以上HTML结构中，获取的是etable1中的数据
+let arr = funsent.etable.data(document.querySelector('#etable2')); // 以上HTML结构中，获取的是etable2中的数据
+let arr = funsent.etable.data($('#etable1')); // 以上HTML结构中，获取的是etable1中的数据
+let arr = funsent.etable.data($('#etable2')); // 以上HTML结构中，获取的是etable2中的数据
+
+// 获取方法三：参数以实例化顺序索引给出
+let arr = funsent.etable.data(0); // 以上HTML结构中，获取的是etable1中的数据
+let arr = funsent.etable.data(1); // 以上HTML结构中，获取的是etable2中的数据
+
+// 获取方法思：参数以自定义标签给出
+let arr = funsent.etable.data({tag:'etable1_tag'}); // 以上HTML结构中，获取的是etable1中的数据
+let arr = funsent.etable.data({tag:'etable2_tag'}); // 以上HTML结构中，获取的是etable2中的数据
 ```
 
 >  返回的是json对象数组，如果提交到服务器后，则请自行处理
+
+#### 数据调试
+
+```javascript
+// 新增的info方法用于输出etable内部存储的数据格式，供大家开发调试时使用
+console.log(funsent.etable.info());
+```
 
 #### 插件已实现列类型
 
