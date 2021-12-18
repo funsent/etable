@@ -12,9 +12,9 @@
 
 #### 插件演示
 
-![单实例动画演示](tests/instance.gif)
+![etable demo 演示](tests/demo.png)
 
-![多实例演示](tests/instances.png)
+![etable多实例 实际项目中的演示](tests/instances.png)
 
 #### 插件使用
 
@@ -25,12 +25,12 @@
     <table id="etable1">
         <thead> <!-- thead是必须的 -->
             <tr>
-                <th style="40px;"></th> <!-- 注意是th不是td -->
-                <th style="100px;">证书名称</th>
-                <th style="100px;">证书编号</th>
-                <th style="100px;">颁发日期</th>
-                <th style="100px;">颁发机构</th>
-                <th style="100px;">备注</th>
+                <th style="width:40px;"></th> <!-- 注意是th不是td -->
+                <th style="width:100px;">证书名称</th>
+                <th style="width:100px;">证书编号</th>
+                <th style="width:100px;">颁发日期</th>
+                <th style="width:100px;">颁发机构</th>
+                <th style="width:100px;">备注</th>
             </tr>
         </thead>
 
@@ -49,12 +49,12 @@
     <table id="etable2">
         <thead> <!-- thead是必须的 -->
             <tr>
-                <th style="40px;"></th> <!-- 注意是th不是td -->
-                <th style="100px;">证书名称</th>
-                <th style="100px;">证书编号</th>
-                <th style="100px;">颁发日期</th>
-                <th style="100px;">颁发机构</th>
-                <th style="100px;">备注</th>
+                <th style="width:40px;"></th> <!-- 注意是th不是td -->
+                <th style="width:100px;">证书名称</th>
+                <th style="width:100px;">证书编号</th>
+                <th style="width:100px;">颁发日期</th>
+                <th style="width:100px;">颁发机构</th>
+                <th style="width:100px;">备注</th>
             </tr>
         </thead>
 
@@ -80,13 +80,15 @@
 ```
 
 ```javascript
-<script src="jQuery.js"></script>
-<script src="layer.js"></script>
-<script src="laydate.js"></script>
-<script src="etable.js"></script>
+<script src="js/jquery.min.js"></script>
+<link rel="stylesheet" type="text/css" href="resources/hippo/iconfont.css?v=202112171533" />
+<link rel="stylesheet" type="text/css" href="resources/layui/laydate/laydate.css" />
+<script src="resources/layui/laydate/laydate.js"></script>
+<script src="resources/layui/layer/layer.js"></script>
+<script src="../src/etable.js"></script>
 ```
 
-> jQuery 、laydate 请自行到相关网站下载
+> jQuery、iconfont、laydate、layer 可自行到相关官网下载，或使用下载的etable目录的相关文件
 
 
 3.  初始化，两个table转成可编辑的表格
@@ -95,14 +97,14 @@
 let values = {0:'禁用', 1:'启用'}; // select下拉框的可选数据来源
 
 funsent.etable.init('#etable1', {
-    tag: 'etable1_tag'
+    tag: 'etable1_tag',
     row_number: 3,
-    editable_row_max: 10, // 新增参数，限制可编辑行数上限
+    editable_row_max: 10,
     enable_keyboard: true,
     enable_tab_insert: true,
     enable_button: true,
     columns: [
-        {type:'checkbox', name:'id', value:'', readonly:false},
+        0,//{type:'checkbox', name:'id', value:'', readonly:false},
         {type:'text', name:'name', value:'', align:'left', readonly:false},
         {type:'text', name:'certno', value:'', align:'left', readonly:false},
         {type:'date', name:'issue_time', value:'', align:'center', readonly:true},
@@ -112,9 +114,9 @@ funsent.etable.init('#etable1', {
 });
 
 funsent.etable.init('#etable2', {
-    tag: 'etable2_tag'
+    tag: 'etable2_tag',
     row_number: 3,
-    editable_row_max: 10, // 新增参数，限制可编辑行数上限
+    editable_row_max: 10,
     enable_keyboard: true,
     enable_tab_insert: true,
     enable_button: true,
@@ -128,7 +130,7 @@ funsent.etable.init('#etable2', {
     ]
 });
 ```
-> 以上即完成了etable插件的页面载入和使用
+> 以上步骤后就完成了etable插件的页面载入和使用
 
 4.  数据收集
 
@@ -163,16 +165,16 @@ let arr = funsent.etable.data({tag:'etable2_tag'}); // 获取etable2数据
 console.log(funsent.etable.info());
 ```
 
-#### 插件已实现列类型
+#### 已实现列类型
 
-1. 序号列（不可编辑，但是用插件去维护序号）
+1. 序号列（不可编辑，由插件内部自动维护序号）
 2. 原始数据列（不可编辑，保持原有td元素的值，或者可选择设置空字符串值）
 3. 复选框checkbox列（编辑列，始终居中，可传入默认值，支持常用样式定义）
 4. 下拉选择select列（编辑列，可传入默认值和下拉数据源，支持常用样式定义）
 5. 普通文本text列（编辑列，可传入默认值，支持常用样式定义）
 6. 日期选择date列（编辑列，普通文本text列的变种，默认只选不写）
 
-#### 插件特点
+#### 插件特性
 
 - 支持列配置，通过传入对象数组配置列，有点类似于datagrid的传参方式
 - 支持参数配置，通过调用config方法，传入json对象格式的参数
@@ -182,7 +184,8 @@ console.log(funsent.etable.info());
 - 支持获取列数据，可用于表单提交
 - 支持序号自维护（这点也是客户特别需要的）
 - 支持某行某列不启用编辑功能
-- 支持是否启用按键、是否启用工具按钮等独立配置参数
+- 支持是否启用按键、是否启用工具按钮等独立配置参数、
+- 支持module方式引入
 
 
 #### 意见建议

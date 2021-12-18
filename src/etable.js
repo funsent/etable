@@ -3,13 +3,27 @@
  * 一款基于jQuery的轻量级可编辑表格插件，适用于快速录单等应用场景，支持键盘操作
  * 
  * @package  funsent
- * @link     http://www.funsent.com
+ * @link     http://www.funsent.com/
  * @license  https://opensource.org/licenses/MIT/
  * @author   yanggf <2018708@qq.com>
- * @version  0.1.2
+ * @version  v0.2.1
  */
 
- ; (function ($, global) {
+; (function (global, factory) {
+    "use strict";
+    if (typeof module === 'object' && typeof module.exports === 'object') {
+        module.exports = global.document ? factory(global, true) : function (w) {
+            if (!w.document) {
+                throw new Error('jQuery requires a window with a document');
+            }
+            return factory(w);
+        };
+    } else {
+        factory(global);
+    }
+})(typeof window !== 'undefined' ? window : this, function (window, noGlobal) {
+
+    let $ = jQuery;
 
     // 默认参数
     let defaults = {
@@ -96,7 +110,7 @@
                 let index = Math.floor(element);
                 return this.instances[index] || undefined;
             }
-            
+
             if (this.isObject(element)) {
                 // 根据标签获取对应实例
                 let tag = element['tag'];
@@ -142,11 +156,17 @@
                 let $columns = rows[key].find('td');
                 let inputs = {};
                 $columns.each(function () {
-                    let $inputs = $(this).children(editableInputs);
+                    // let $inputs = $(this).children(editableInputs);
+                    let $inputs = $(this).find(editableInputs);
                     if ($inputs.length) {
                         let $input = $inputs.eq(0);
                         let key = $input.prop('name');
                         let value = $input.val();
+                        if ($inputs.is('input:checkbox')) {
+                            if (!$inputs.prop('checked')) {
+                                value = '';
+                            }
+                        }
                         inputs[key] = value;
                     }
                 });
@@ -176,7 +196,7 @@
                 this.consoleError(this.lang('create etable on hidden element is invalid'));
                 return false;
             }
-            
+
             if (!this.isJsonObject(opts)) {
                 opts = {};
             }
@@ -254,7 +274,7 @@
                     let $tds = $tr.find('td');
                     for (let j = 0; j < tdCnt; j++) {
                         let $td = $tds.eq(j), textValue = $td.text(), textAlign = $td.css('textAlign');
-                        let $editor = this.createEditor(instance, 'modify', i, j, textValue, textAlign);
+                        let $editor = this.createEditor(instance, 'change', i, j, textValue, textAlign);
                         $td.html($editor).css({ padding: 0, textAlign: textAlign });
 
                         // 临时保存td原有的对齐方式
@@ -276,7 +296,7 @@
                     for (let j = 0; j < tdCnt; j++) {
                         let column = columns[j] || {}, columnAlign = column['align'] || '';
                         let $td = $('<td></td>'), textValue = '', textAlign = textAligns[j] || columnAlign;
-                        let $editor = this.createEditor(instance, 'insert', i, j, textValue, textAlign);
+                        let $editor = this.createEditor(instance, 'attach', i, j, textValue, textAlign);
                         $td.html($editor).css({ padding: 0, textAlign: textAlign });
                         $tr.append($td);
                     }
@@ -398,13 +418,13 @@
                 return;
             }
 
-            let style = '<style rel="funsent-etable-btn-style">div.funsent-etable-btn-group{position:absolute;left:2px;top:0;display:block;padding:0;margin:0;width:48px;height:14px;overflow:hidden;background-color:transparent;}a.funsent-etable-btn{opacity:0.3;font-size:12px;width:12px;height:12px;display:inline-block;text-align:center;background-color:#eff8fd;color:#06f;padding:0;margin:0 2px 0 0;border:1px solid #06f;border-radius:2px;}a.funsent-etable-btn:hover{opacity:1;background-color:#06f;color:#eff8fd;}a.funsent-etable-btn:active{positon:relative;left:1px;top:1px;}a.funsent-etable-btn>label{position:relative;top:-9px;cursor:pointer;}</style>';
+            let style = '<style rel="funsent-etable-btn-style">div.funsent-etable-btn-group{position:absolute;left:2px;top:0;display:block;padding:0;margin:0;width:48px;height:14px;overflow:hidden;background-color:transparent;}a.funsent-etable-btn{opacity:0.3;font-size:12px;width:12px;height:12px;line-height:12px;display:block;float:left;text-align:center;background-color:#eff8fd;color:#06f;padding:0;margin:0 2px 0 0;border:1px solid #06f;border-radius:2px;position:relative;}a.funsent-etable-btn:hover{opacity:1;background-color:#06f;color:#eff8fd;}a.funsent-etable-btn:active{positon:relative;left:1px;top:1px;}a.funsent-etable-btn>label{position:absolute;left:0;display:block;width:12px;height:11px;line-height:11px;cursor:pointer;}</style>';
 
-            let $table = instance.target, $thead = $table.find('thead'), theadHeight = $thead.outerHeight();
-            let $parent = $table.closest('div').css('position', 'relative');
+            let $table = instance.target, $thead = $table.find('thead'), theadHeight = $thead.outerHeight(); let $parent = $table.closest('div').css('position', 'relative');
 
             // 删除之前的所有工具按钮
             $parent.find('div.funsent-etable-btn-group').remove();
+            $('head').eq(0).find('style[rel="funsent-etable-btn-style"]').remove();
 
             let that = this;
             for (let i = 0; i < rowCnt; i++) {
@@ -444,7 +464,8 @@
                 });
 
                 if (!$('style[rel="funsent-etable-btn-style"]').length) {
-                    $parent.append(style)
+                    // $parent.append(style);
+                    $('head').eq(0).append(style);
                 }
                 $group.appendTo($parent);
             }
@@ -499,7 +520,7 @@
                 let rowCnt = rows.length;
                 let rowMax = instance.configs['editable_row_max'];
                 if (rowCnt >= rowMax) {
-                    let msg = this.lang('cannot insert more rows', rowMax);
+                    let msg = instance.element_key + ': ' + this.lang('cannot insert more rows', rowMax);
                     console.log(msg);
                     layer.msg(msg);
                     return false;
@@ -535,7 +556,7 @@
 
                 let rowCnt = rows.length;
                 if (rowCnt <= 1) {
-                    let msg = this.lang('the last row cannot be deleted');
+                    let msg = instance.element_key + ': ' + this.lang('the last row cannot be deleted');
                     console.log(msg);
                     layer.msg(msg);
                     return false;
@@ -548,7 +569,7 @@
             return false;
         },
 
-        // 创建编辑器，参数分别为：实例，模式（修改行还是插入行），行索引，列索引，列原始数据，列原始对其方式
+        // 创建编辑器，参数分别为：实例，模式（转换、添加或插入），行索引，列索引，列原始数据，列原始对其方式
         createEditor: function (instance, mode, rowIndex, colIndex, textValue, textAlign) {
             let columns = instance.configs['columns'], column = columns[colIndex];
 
@@ -559,9 +580,9 @@
                 return '';
             } else if (this.isNumber(column)) {
                 let existableRowCnt = instance.existable_rows.length, order = 1;
-                if (mode == 'modify') {
+                if (mode == 'change') {
                     order = existableRowCnt;
-                } else if (mode == 'insert') {
+                } else if (mode == 'attach' || mode == 'insert') {
                     order = existableRowCnt + rowIndex + 1;
                 }
                 return this.renderOrder(order);
@@ -591,23 +612,18 @@
                 name = column['name'] || autoName,
                 value = textValue || (column['value'] || '');
 
+            // 插入模式
+            if (mode == 'insert') {
+                value = textValue;
+            }
+
             // 样式覆盖
             style = Object.assign({}, style, column['style'] || {});
             style['width'] = column['width'] || '100%';
             style['height'] = column['height'] || '100%';
             style['textAlign'] = textAlign || (column['align'] || '');
 
-            let $editor = this[type.toLowerCase() + 'Editor'](name, value, column, style);
-            // if (type == 'date') {
-            //     $editor = this.dateEditor(name, value, column, style);
-            // } else if (type == 'select') {
-            //     $editor = this.selectEditor(name, value, column, style);
-            // } else if (type == 'checkbox') {
-            //     $editor = this.checkboxEditor(name, value, column, style);
-            // } else {
-            //     $editor = this.textEditor(name, value, column, style);
-            // }
-            return $editor;
+            return this[type.toLowerCase() + 'Editor'](name, value, column, style);
         },
 
         // 文本框编辑器
@@ -757,6 +773,11 @@
     };
 
     // 插件对象暴露出去
-    !('funsent' in global) && (global.funsent = {});
-    !('etable' in global.funsent) && (global.funsent.etable = etable);
-})(jQuery, window);
+    !('funsent' in window) && (window.funsent = {});
+    !('etable' in window.funsent) && (window.funsent.etable = etable);
+
+    if (!noGlobal) {
+        window.jQuery = window.$ = jQuery;
+    }
+    return jQuery;
+});
