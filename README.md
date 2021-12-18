@@ -151,7 +151,7 @@ let arr = funsent.etable.data($('#etable2')); // 获取etable2数据
 let arr = funsent.etable.data(0); // 获取etable1数据
 let arr = funsent.etable.data(1); // 获取etable2数据
 
-// 获取方法思：参数以自定义标签给出
+// 获取方法四：参数以自定义标签给出
 let arr = funsent.etable.data({tag:'etable1_tag'}); // 获取etable1数据
 let arr = funsent.etable.data({tag:'etable2_tag'}); // 获取etable2数据
 ```
