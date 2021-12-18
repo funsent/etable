@@ -418,23 +418,28 @@
                 return;
             }
 
-            let style = '<style rel="funsent-etable-btn-style">div.funsent-etable-btn-group{position:absolute;left:2px;top:0;display:block;padding:0;margin:0;width:48px;height:14px;overflow:hidden;background-color:transparent;}a.funsent-etable-btn{opacity:0.3;font-size:12px;width:12px;height:12px;line-height:12px;display:block;float:left;text-align:center;background-color:#eff8fd;color:#06f;padding:0;margin:0 2px 0 0;border:1px solid #06f;border-radius:2px;position:relative;}a.funsent-etable-btn:hover{opacity:1;background-color:#06f;color:#eff8fd;}a.funsent-etable-btn:active{positon:relative;left:1px;top:1px;}a.funsent-etable-btn>label{position:absolute;left:0;display:block;width:12px;height:11px;line-height:11px;cursor:pointer;}</style>';
-
             let $table = instance.target, $thead = $table.find('thead'), theadHeight = $thead.outerHeight(); let $parent = $table.closest('div').css('position', 'relative');
 
             // 删除之前的所有工具按钮
             $parent.find('div.funsent-etable-btn-group').remove();
-            $('head').eq(0).find('style[rel="funsent-etable-btn-style"]').remove();
+
+            let btnGroupStyle = {position:'absolute',left:'2px',top:'0',display:'block',padding:'0',margin:'0',width:'48px',height:'14px',overflow:'hidden',backgroundColor:'transparent'};
+            let btnStyle = {opacity:'0.3',fontSize:'12px',width:'12px',height:'12px',lineHeight:'12px',display:'block',float:'left',textAlign:'center',backgroundColor:'#eff8fd',color:'#06f',padding:'0',margin:'0 2px 0 0',border:'1px solid #06f',borderRadius:'2px',position:'relative'};
+            let btnLabelStyle = {position:'absolute',left:'0',display:'block',width:'12px',height:'11px',lineHeight:'11px',cursor:'pointer'};
+            const over = function () { $(this).css({opacity:'1',backgroundColor:'#06f',color:'#eff8fd'}); };
+            const out = function () { $(this).css({opacity:'0.3',backgroundColor:'#eff8fd',color:'#06f'}); };
+            const down = function () { $(this).css({positon:'relative',left:'1px',top:'1px'}); };
+            const up = function () { $(this).css({positon:'static',left:'0',top:'0'}); }
 
             let that = this;
             for (let i = 0; i < rowCnt; i++) {
 
-                let $btn1 = $('<a class="funsent-etable-btn" href="javascript:;" title="上方插入新行"><label>&#9650</label></a>'),
-                    $btn2 = $('<a class="funsent-etable-btn" href="javascript:;" title="下方插入新行"><label>&#9660</label></a>'),
-                    $btn3 = $('<a class="funsent-etable-btn" href="javascript:;" title="删除当前行"><label>&#9986</label></a>');
+                let $btn1 = $('<a class="funsent-etable-btn" href="javascript:;" title="上方插入新行"><label>&#9650</label></a>').css(btnStyle).hover(over, out).mousedown(down).mouseup(up).find('label').css(btnLabelStyle).end(),
+                    $btn2 = $('<a class="funsent-etable-btn" href="javascript:;" title="下方插入新行"><label>&#9660</label></a>').css(btnStyle).hover(over, out).mousedown(down).mouseup(up).find('label').css(btnLabelStyle).end(),
+                    $btn3 = $('<a class="funsent-etable-btn" href="javascript:;" title="删除当前行"><label>&#9986</label></a>').css(btnStyle).hover(over, out).mousedown(down).mouseup(up).find('label').css(btnLabelStyle).end();
 
                 let $row = rows[i], top = theadHeight + ($row.outerHeight() * i) + 2;
-                let $group = $('<div class="funsent-etable-btn-group"></div>');
+                let $group = $('<div class="funsent-etable-btn-group"></div>').css(btnGroupStyle);
                 $group.append($btn1, $btn2, $btn3).css('top', top);
 
                 // 上方插入新行
@@ -463,10 +468,6 @@
                     }
                 });
 
-                if (!$('style[rel="funsent-etable-btn-style"]').length) {
-                    // $parent.append(style);
-                    $('head').eq(0).append(style);
-                }
                 $group.appendTo($parent);
             }
         },
@@ -520,8 +521,8 @@
                 let rowCnt = rows.length;
                 let rowMax = instance.configs['editable_row_max'];
                 if (rowCnt >= rowMax) {
-                    let msg = instance.element_key + ': ' + this.lang('cannot insert more rows', rowMax);
-                    console.log(msg);
+                    let msg = this.lang('cannot insert more rows', rowMax);
+                    console.log(instance.element_key + ': ' + msg);
                     layer.msg(msg);
                     return false;
                 }
@@ -556,8 +557,8 @@
 
                 let rowCnt = rows.length;
                 if (rowCnt <= 1) {
-                    let msg = instance.element_key + ': ' + this.lang('the last row cannot be deleted');
-                    console.log(msg);
+                    let msg = this.lang('the last row cannot be deleted');
+                    console.log(instance.element_key + ': ' + msg);
                     layer.msg(msg);
                     return false;
                 }
