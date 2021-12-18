@@ -72,7 +72,7 @@
 </div>
 ```
 
-2.  引入jQuery.js、laydate.js、etable.js
+2.  引入iconfont.css、jQuery.js、layer.js、laydate.js、etable.js
 
 
 ```shell
