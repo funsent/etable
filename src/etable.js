@@ -230,7 +230,10 @@
         // 应用场景：如提交后不需要在启用etable编辑的情况，可调用此方法
         preview: function () { },
 
-        //TODO 获取实例信息，供调试输出使用
+        //TODO 移动行，向上向下移动（交换行）
+        move: function () {},
+
+        // 获取实例信息，供调试输出使用
         info: function (element, key) {
             let instance = this.instance(element);
             if (!instance) {
