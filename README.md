@@ -72,7 +72,7 @@
 </div>
 ```
 
-2.  引入iconfont.css、jQuery.js、layer.js、laydate.js、etable.js
+2.  引入jQuery.js、layer.js、laydate.js、etable.js
 
 
 ```shell
@@ -81,14 +81,13 @@
 
 ```javascript
 <script src="js/jquery.min.js"></script>
-<link rel="stylesheet" type="text/css" href="resources/hippo/iconfont.css?v=202112171533" />
-<link rel="stylesheet" type="text/css" href="resources/layui/laydate/laydate.css" />
-<script src="resources/layui/laydate/laydate.js"></script>
-<script src="resources/layui/layer/layer.js"></script>
+<link rel="stylesheet" type="text/css" href="js/laydate/laydate.css" />
+<script src="js/laydate/laydate.js"></script>
+<script src="js/layer/layer.js"></script>
 <script src="../src/etable.js"></script>
 ```
 
-> jQuery、iconfont、laydate、layer 可自行到相关官网下载，或使用下载的etable目录的相关文件
+> jQuery、layer、laydate 可自行到相关官网下载，或使用etable插件目录的现有文件
 
 
 3.  初始化，两个table转成可编辑的表格
@@ -151,7 +150,7 @@ let arr = funsent.etable.data($('#etable2')); // 获取etable2数据
 let arr = funsent.etable.data(0); // 获取etable1数据
 let arr = funsent.etable.data(1); // 获取etable2数据
 
-// 获取方法思：参数以自定义标签给出
+// 获取方法四：参数以自定义标签给出
 let arr = funsent.etable.data({tag:'etable1_tag'}); // 获取etable1数据
 let arr = funsent.etable.data({tag:'etable2_tag'}); // 获取etable2数据
 ```
@@ -190,6 +189,7 @@ console.log(funsent.etable.info());
 
 #### 意见建议
 
-微信：younggf
-QQ: 2018708
-备注：etable插件
+**联系方式**
+QQ: 2018708，微信：younggf
+
+> 加好友时请备注：etable插件
