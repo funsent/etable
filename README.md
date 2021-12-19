@@ -157,6 +157,28 @@ let arr = funsent.etable.data({tag:'etable2_tag'}); // 获取etable2数据
 
 >  返回的是json对象数组，如果提交到服务器后，则请自行处理
 
+5. 数据填充（回填）
+
+```javascript
+
+// 输入填充格式，如果从后台返回，则需要时对象数组形式传入
+let records = [
+    {name:"", age:"", address""},
+    {name:"", age:"", address""},
+    {name:"", age:"", address""},
+    {name:"", age:"", address""}
+];
+
+// 同样有如下几种填充方式，任选一种
+funsent.etable.fill('#etable1', records);
+funsent.etable.fill(document.querySelector('#etable1'), records);
+funsent.etable.fill($('#etable1'), records);
+funsent.etable.fill(0, records);
+funsent.etable.fill({tag:'etable1_tag'}, records);
+```
+
+> fill方法返回true表示成功，false表示失败
+
 #### 数据调试
 
 ```javascript

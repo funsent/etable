@@ -6,10 +6,10 @@
  * @link     http://www.funsent.com/
  * @license  https://opensource.org/licenses/MIT/
  * @author   yanggf <2018708@qq.com>
- * @version  v0.2.1
+ * @version  v0.2.2
  */
 
-; (function (global, factory) {
+ ; (function (global, factory) {
     "use strict";
     if (typeof module === 'object' && typeof module.exports === 'object') {
         module.exports = global.document ? factory(global, true) : function (w) {
@@ -129,7 +129,6 @@
                 return undefined;
             }
 
-            // 注意对象比较会返回false
             for (let key in this.instances) {
                 let instance = this.instances[key];
                 if (instance.element === element) {
@@ -159,20 +158,73 @@
                     // let $inputs = $(this).children(editableInputs);
                     let $inputs = $(this).find(editableInputs);
                     if ($inputs.length) {
-                        let $input = $inputs.eq(0);
-                        let key = $input.prop('name');
-                        let value = $input.val();
-                        if ($inputs.is('input:checkbox')) {
+                        let $input = $inputs.eq(0),
+                            name = $input.prop('name'),
+                            value = $input.val(),
+                            tagName = $input.prop('tagName').toLowerCase(),
+                            type = $input.prop('type').toLowerCase();
+                        if (tagName == 'input' && type == 'checkbox') {
                             if (!$inputs.prop('checked')) {
                                 value = '';
                             }
                         }
-                        inputs[key] = value;
+                        inputs[name] = value;
                     }
                 });
                 arr.push(inputs);
             }
             return arr;
+        },
+
+        // 回填数据
+        fill: function (element, records) {
+            if (!Array.isArray(records) || records.length == 0) {
+                return false;
+            }
+
+            let instance = this.instance(element);
+            if (!instance) {
+                return false;
+            }
+
+            let rows = instance.editable_rows;
+            if (!rows.length) {
+                return false;
+            }
+
+            let i = 0;
+            for (let key in rows) {
+                let record = records.splice(0, 1);
+                if (!record.length) {
+                    break;
+                }
+                record = record[0]; // 此处注意，splice 返回的是一个数组类型
+
+                rows[key].find('td').each(function () {
+                    let $inputs = $(this).find(editableInputs);
+                    if ($inputs.length) {
+
+                        let $input = $inputs.eq(0),
+                            name = $input.prop('name'),
+                            tagName = $input.prop('tagName').toLowerCase(),
+                            type = $input.prop('type').toLowerCase();
+                        let value = record[name] || '';
+                        if (tagName == 'select' || tagName == 'textarea') {
+                            $input.val(value);
+                            return;
+                        }
+                        if (tagName == 'input') {
+                            if (type == 'checkbox') {
+                                $input.val(value).prop('checked', true);
+                                return;
+                            }
+                            $input.val(value);
+                        }
+                    }
+                });
+                i++;
+            }
+            return true;
         },
 
         // 创建实例
@@ -206,11 +258,23 @@
                 opts['tag'] = tag = '';
             }
 
+            // 清理原先相同属性的实例
+            for (let i = 0; i < this.instances.length; i++) {
+                let oldInstance = this.instances[i];
+                if (
+                    oldInstance.element === element
+                    || oldInstance.tag === tag
+                    || oldInstance.target === $target
+                ) {
+                    this.instances.splice(i--, 1); // 注意下标变化
+                }
+            }
+
             let configs = Object.assign({}, defaults, opts);
-            let elementKey = 'funsent_etable' + this.instances.length;
+            
             let instance = {
                 element: element,
-                element_key: elementKey,
+                // element_key: elementKey,
                 target: $target,
                 tag: tag,
                 configs: configs,
@@ -219,6 +283,12 @@
             };
 
             this.instances.push(instance);
+
+            // 添加element_key
+            let elementKeyPrefix = 'funsent_etable';
+            for (let i = 0, length = this.instances.length; i < length; i++) {
+                this.instances[i].element_key = elementKeyPrefix + i;
+            }
 
             return instance;
         },
@@ -231,7 +301,7 @@
         preview: function () { },
 
         //TODO 移动行，向上向下移动（交换行）
-        move: function () {},
+        move: function () { },
 
         // 获取实例信息，供调试输出使用
         info: function (element, key) {
@@ -426,13 +496,13 @@
             // 删除之前的所有工具按钮
             $parent.find('div.funsent-etable-btn-group').remove();
 
-            let btnGroupStyle = {position:'absolute',left:'2px',top:'0',display:'block',padding:'0',margin:'0',width:'48px',height:'14px',overflow:'hidden',backgroundColor:'transparent'};
-            let btnStyle = {opacity:'0.3',fontSize:'12px',width:'12px',height:'12px',lineHeight:'12px',display:'block',float:'left',textAlign:'center',backgroundColor:'#eff8fd',color:'#06f',padding:'0',margin:'0 2px 0 0',border:'1px solid #06f',borderRadius:'2px',position:'relative'};
-            let btnLabelStyle = {position:'absolute',left:'0',display:'block',width:'12px',height:'11px',lineHeight:'11px',cursor:'pointer'};
-            const over = function () { $(this).css({opacity:'1',backgroundColor:'#06f',color:'#eff8fd'}); };
-            const out = function () { $(this).css({opacity:'0.3',backgroundColor:'#eff8fd',color:'#06f'}); };
-            const down = function () { $(this).css({positon:'relative',left:'1px',top:'1px'}); };
-            const up = function () { $(this).css({positon:'static',left:'0',top:'0'}); }
+            let btnGroupStyle = { position: 'absolute', left: '2px', top: '0', display: 'block', padding: '0', margin: '0', width: '48px', height: '14px', overflow: 'hidden', backgroundColor: 'transparent' };
+            let btnStyle = { opacity: '0.3', fontSize: '12px', width: '12px', height: '12px', lineHeight: '12px', display: 'block', float: 'left', textAlign: 'center', backgroundColor: '#eff8fd', color: '#06f', padding: '0', margin: '0 2px 0 0', border: '1px solid #06f', borderRadius: '2px', position: 'relative' };
+            let btnLabelStyle = { position: 'absolute', left: '0', display: 'block', width: '12px', height: '11px', lineHeight: '11px', cursor: 'pointer' };
+            const over = function () { $(this).css({ opacity: '1', backgroundColor: '#06f', color: '#eff8fd' }); };
+            const out = function () { $(this).css({ opacity: '0.3', backgroundColor: '#eff8fd', color: '#06f' }); };
+            const down = function () { $(this).css({ positon: 'relative', left: '1px', top: '1px' }); };
+            const up = function () { $(this).css({ positon: 'static', left: '0', top: '0' }); }
 
             let that = this;
             for (let i = 0; i < rowCnt; i++) {
@@ -768,6 +838,11 @@
         // 返回json对象数组的表单数据
         data: function (element) {
             return _this.data(element);
+        },
+
+        // 填充数据
+        fill: function (element, records) {
+            return _this.fill(element, records);
         },
 
         // 获取实例信息，供调试输出使用
