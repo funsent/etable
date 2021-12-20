@@ -6,7 +6,7 @@
  * @link     http://www.funsent.com/
  * @license  https://opensource.org/licenses/MIT/
  * @author   yanggf <2018708@qq.com>
- * @version  v0.2.2
+ * @version  v0.2.3
  */
 
  ; (function (global, factory) {
@@ -65,10 +65,17 @@
 
     // 语言包
     const langs = {
-        'invalid element name': 'element 参数必须是有效的table样式字符串或者table的DOM对象',
+        'invalid element name': '{0} 参数必须是有效的table样式字符串或者table的DOM对象',
+        'instance not found': 'etable 实例不存在',
         'create etable on hidden element is invalid': '隐藏元素上创建etable是无意义的',
+        'the immediate parent of table must be a block element': 'table的直接父级元素必须是块元素（display:block）',
         'cannot insert more rows': '无法新增行，最多编辑行数：{0}',
         'the last row cannot be deleted': '禁止删除唯一行'
+    };
+
+    // 返回类型
+    const getType = function (v) {
+        return Object.prototype.toString.call(v).toLowerCase();
     };
 
     // 私有方法
@@ -98,9 +105,6 @@
         // 3. 自定义table的tag唯一字符串标签，必须以json对象形式给出，如：{tag:'table'}
         // 4. 整数索引，实例化etable的顺序
         instance: function (element) {
-            if (typeof element === 'undefined') {
-                return undefined;
-            }
 
             if (this.isNumber(element)) {
                 // 根据实例化顺序索引获取对应实例
@@ -108,10 +112,15 @@
                     return undefined;
                 }
                 let index = Math.floor(element);
-                return this.instances[index] || undefined;
+                let instance = this.instances[index];
+                if (!instance) {
+                    this.consoleError(this.lang('instance not found'));
+                    return undefined;
+                }
+                return instance;
             }
 
-            if (this.isObject(element)) {
+            if (this.isJsonObject(element)) {
                 // 根据标签获取对应实例
                 let tag = element['tag'];
                 if (tag) {
@@ -125,7 +134,8 @@
                 }
             }
 
-            if (!this.isString(element) && !this.isObject(element)) {
+            if (!this.isString(element) && !this.isTableElement(element) && !(element instanceof $)) {
+                this.consoleError(this.lang('invalid element name', 'element'));
                 return undefined;
             }
 
@@ -135,6 +145,8 @@
                     return instance;
                 }
             }
+
+            this.consoleError(this.lang('instance not found'));
             return undefined;
         },
 
@@ -178,7 +190,7 @@
 
         // 回填数据
         fill: function (element, records) {
-            if (!Array.isArray(records) || records.length == 0) {
+            if (!this.isArray(records) || records.length == 0) {
                 return false;
             }
 
@@ -215,7 +227,7 @@
                         }
                         if (tagName == 'input') {
                             if (type == 'checkbox') {
-                                $input.val(value).prop('checked', true);
+                                $input.prop('checked', $input.val() == value);
                                 return;
                             }
                             $input.val(value);
@@ -229,23 +241,38 @@
 
         // 创建实例
         // element参数可以为：
-        // 1. table的DOM对象
-        // 2. table样式字符串
+        // 1. table样式字符串
+        // 2. table的DOM对象
+        // 3. table的jQuery对象
         create: function (element, opts) {
-            let msg = this.lang('invalid element name');
-            if (!this.isString(element) && !this.isObject(element)) {
+            let $target, msg = this.lang('invalid element name', 'element');
+            if (this.isString(element)) {
+                $target = $(element).eq(0);
+                if (!$target.is('table')) {
+                    this.consoleError(msg);
+                    return false;
+                }
+            } else if (this.isTableElement(element)) {
+                $target = $(element).eq(0);
+            } else if (element instanceof $) {
+                $target = element.eq(0);
+                if (!$target.is('table')) {
+                    this.consoleError(msg);
+                    return false;
+                }
+            } else {
                 this.consoleError(msg);
                 return false;
             }
 
-            let $target = $(element).eq(0);
-            if (!$target.is('table')) {
-                this.consoleError(msg);
-                return false;
-            }
 
             if ($target.is(':hidden')) {
                 this.consoleError(this.lang('create etable on hidden element is invalid'));
+                return false;
+            }
+
+            if ($target.parent().css('display') != 'block') {
+                this.consoleError(this.lang('the immediate parent of table must be a block element'));
                 return false;
             }
 
@@ -271,7 +298,7 @@
             }
 
             let configs = Object.assign({}, defaults, opts);
-            
+
             let instance = {
                 element: element,
                 // element_key: elementKey,
@@ -491,7 +518,7 @@
                 return;
             }
 
-            let $table = instance.target, $thead = $table.find('thead'), theadHeight = $thead.outerHeight(); let $parent = $table.closest('div').css('position', 'relative');
+            let $table = instance.target, $thead = $table.find('thead'), theadHeight = $thead.outerHeight(); let $parent = $table.parent().css('position', 'relative');
 
             // 删除之前的所有工具按钮
             $parent.find('div.funsent-etable-btn-group').remove();
@@ -712,10 +739,10 @@
             let readonly = column['readonly'] || false;
             let values = column['values'] || [];
             let options = '<option value=""></option>', optionValueCnt = 0;
-            if (this.isJsonObject(values) && JSON.stringify(value) != '{}') {
+            if (this.isJsonObject(values)) {
                 for (let v in values) {
                     let selected = (value == v ? ' selected="selected"' : '');
-                    let text = values[v];
+                    let text = values[v] || v;
                     options += '<option value="' + v + '"' + selected + '>' + text + '</option>';
                     optionValueCnt++;
                 }
@@ -746,24 +773,34 @@
         //TODO 数字框编辑器（含小数）
         numberEditor: function (name, value, column, style) { },
 
+        // 是否为null
+        isNull: function (value) {
+            return getType(value) === '[object null]';
+        },
+
+        // 是否为null
+        isUndefined: function (value) {
+            return getType(value) === '[object undefined]';
+        },
+
         // 是否是字符串
         isString: function (value) {
-            return typeof value === 'string';
+            return getType(value) === '[object string]';
         },
 
         // 是否为布尔值
         isBoolean: function (value) {
-            return typeof value === 'boolean';
+            return getType(value) === '[object boolean]';
         },
 
         // 是否为数字
         isNumber: function (value) {
-            return typeof value === 'number';
+            return getType(value) === '[object number]';
         },
 
         // 是否为数组
         isArray: function (value) {
-            return (typeof value === 'object' && JSON.stringify(value).indexOf('[') == 0);
+            return getType(value) === '[object array]';
         },
 
         // 是否在数组中
@@ -774,14 +811,27 @@
             return arr.indexOf(value) !== -1;
         },
 
-        // 是否为对象
-        isObject: function (value) {
-            return typeof value === 'object';
+        // 是否为function
+        isFunction: function (value) {
+            return getType(value) === '[object function]';
         },
 
-        // 是否为json对象
+        // 是否为object
+        isObject: function (value) {
+            return typeof value === 'object' && getType(value) === '[object object]';
+        },
+
+        // 是否为json object，json对象没有length属性
         isJsonObject: function (value) {
-            return (typeof value === 'object' && JSON.stringify(value).indexOf('{') == 0);
+            if (!this.isObject(value)) {
+                return false;
+            }
+            return typeof (value.length) === 'undefined';
+        },
+
+        // 是否为Table元素对象
+        isTableElement: function (value) {
+            return getType(value) === '[object htmltableelement]';
         },
 
         // 去除所有空格后的字符串
@@ -791,7 +841,7 @@
 
         // 获取语言
         lang: function () {
-            let name = arguments[0] || '';
+            let name = arguments[0];
             if (!this.isString(name)) {
                 name = '';
             }
@@ -799,8 +849,8 @@
                 return '';
             }
 
-            let langStr = langs[name] || undefined;
-            if (typeof langStr !== 'string') {
+            let langStr = langs[name];
+            if (!this.isString(langStr)) {
                 return name;
             }
 
