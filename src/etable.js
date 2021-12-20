@@ -525,7 +525,7 @@
 
             let btnGroupStyle = { position: 'absolute', left: '2px', top: '0', display: 'block', padding: '0', margin: '0', width: '48px', height: '14px', overflow: 'hidden', backgroundColor: 'transparent' };
             let btnStyle = { opacity: '0.3', fontSize: '12px', width: '12px', height: '12px', lineHeight: '12px', display: 'block', float: 'left', textAlign: 'center', backgroundColor: '#eff8fd', color: '#06f', padding: '0', margin: '0 2px 0 0', border: '1px solid #06f', borderRadius: '2px', position: 'relative' };
-            let btnLabelStyle = { position: 'absolute', left: '0', display: 'block', width: '12px', height: '11px', lineHeight: '11px', cursor: 'pointer' };
+            let btnLabelStyle = { position: 'absolute', left: '0', display: 'block', width: '12px', height: '100%', lineHeight: '100%', cursor: 'pointer' };
             const over = function () { $(this).css({ opacity: '1', backgroundColor: '#06f', color: '#eff8fd' }); };
             const out = function () { $(this).css({ opacity: '0.3', backgroundColor: '#eff8fd', color: '#06f' }); };
             const down = function () { $(this).css({ positon: 'relative', left: '1px', top: '1px' }); };
