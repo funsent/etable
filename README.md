@@ -12,6 +12,10 @@
 
 #### 插件演示
 
+[demo演示地址](https://funsent.github.io/etable)
+
+> 以上演示地址使用的是 GitHub Pages 服务
+
 ![etable demo 演示](tests/demo.png)
 
 ![etable多实例 实际项目中的演示](tests/instances.png)
