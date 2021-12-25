@@ -288,11 +288,9 @@
             // 清理原先相同属性的实例
             for (let i = 0; i < this.instances.length; i++) {
                 let oldInstance = this.instances[i];
-                if (
-                    oldInstance.element === element
-                    || oldInstance.tag === tag
-                    || oldInstance.target === $target
-                ) {
+                if (oldInstance.element === element || oldInstance.target === $target) {
+                    this.instances.splice(i--, 1); // 注意下标变化
+                } else if (tag.length && oldInstance.tag === tag) {
                     this.instances.splice(i--, 1); // 注意下标变化
                 }
             }
